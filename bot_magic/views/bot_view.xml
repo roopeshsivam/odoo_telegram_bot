@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<openerp>
+	<data>
+		<record id="bot_magic_company_form_view" model="ir.ui.view">
+			<field name="inherit_id" ref="base.view_company_form" />
+			<field name="model">res.company</field>
+			<field name="arch" type="xml">
+				<xpath expr="//field[@name='email']" position="before">
+					<field name="bot_id" />
+				</xpath>
+			</field>
+		</record>
+		<record id="bot_magic_user_form_view" model="ir.ui.view">
+			<field name="inherit_id" ref="base.view_users_form" />
+			<field name="model">res.users</field>
+			<field name="arch" type="xml">
+				<xpath expr="//header" position="inside">
+					<button string="Get ChatID" type="object" name="get_chat_id" />
+				</xpath>
+				<xpath expr="//field[@name='signature']" position="before">
+					<field name="tel_chat_id" />
+				</xpath>
+			</field>
+		</record>
+		<record id="bot_magic_group_form_view" model="ir.ui.view">
+			<field name="inherit_id" ref="base.view_groups_form" />
+			<field name="model">res.groups</field>
+			<field name="arch" type="xml">
+				<xpath expr="//sheet" position="before">
+					<header>
+						<button string="Get ChatID" type="object" name="get_chat_id" />
+					</header>
+				</xpath>
+				<xpath expr="//field[@name='share']" position="before">
+					<field name="tel_chat_id" />
+				</xpath>
+			</field>
+		</record>
+		<record id="view_telegram_message_tree" model="ir.ui.view">
+			<field name="name">telegram.messages.tree</field>
+			<field name="model">telegram.messages</field>
+			<field name="arch" type="xml">
+				<tree string="telegram_messages">
+					<field name="name" />
+					<field name="message_type" />
+					<field name="message_status" />
+				</tree>
+			</field>
+		</record>
+		<record id="view_telegram_message_form" model="ir.ui.view">
+			<field name="name">telegram.messages.form</field>
+			<field name="model">telegram.messages</field>
+			<field name="arch" type="xml">
+				<form>
+					<header>
+						<button string="Send Message" type="object" name="send_message" attrs="{'invisible': [('message_status', '=', 'sent')]}" />
+						<field name="message_status" widget="statusbar" />
+					</header>
+					<sheet>
+						<div class="oe_title">
+							<label for="name" string="Name" class="oe_edit_only" />
+							<h1>
+								<field name="name" />
+							</h1>
+						</div>
+						<group>
+							<group>
+								<field name="message_type" required="1" attrs="{'readonly' : [('message_status', '=', 'sent')]}" />
+								<field name="user_id" options="{'no_create': True, 'no_create_edit':True}" domain="[('tel_chat_id', '!=', False)]" attrs="{
+											'invisible': [('message_type', 'in', ['group', False])],
+											'required': [('message_type', '=', 'user')],
+											'readonly' : [('message_status', '=', 'sent')],
+											}" />
+								<field name="group_id" options="{'no_create': True, 'no_create_edit':True}" domain="[('tel_chat_id', '!=', False)]" attrs="{
+											'invisible': [('message_type', 'in', ['user', False])],
+											'required': [('message_type', '=', 'group')],
+											'readonly' : [('message_status', '=', 'sent')],
+											}" />
+							</group>
+						</group>
+						<group string="Message">
+							<field name="message" attrs="{'readonly': [('message_status', '=', 'sent')]}" />
+							<field name="message_id" readonly="1" />
+							<field name="response" readonly="1" />
+						</group>
+					</sheet>
+				</form>
+			</field>
+		</record>
+		<record model="ir.actions.act_window" id="action_telegram_meassage">
+			<field name="name">Telegram Message</field>
+			<field name="res_model">telegram.messages</field>
+			<field name="view_type">form</field>
+			<field name="view_mode">tree,form</field>
+		</record>
+		<menuitem name="Telegram Messages" id="id_telegram_message" action="action_telegram_meassage" parent="base.menu_email" />
+	</data>
+</openerp>
